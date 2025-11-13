@@ -42,8 +42,9 @@ It adds:
 ## 1. Quick Start
 
 ```powershell
-# Clone or place TTS.py in a working folder
-cd .\Projects\TTS
+# Clone the project from GitHub
+git clone https://github.com/henrybravo/Azure-Speech-TTS-CLI.git
+cd .\Azure-Speech-TTS-CLI
 
 # (Recommended) Create & activate a virtual environment (using uv for speed)
 uv venv
