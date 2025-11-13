@@ -57,8 +57,8 @@ uv pip install azure-cognitiveservices-speech
 $env:AZURE_SPEECH_KEY = "<YOUR_KEY>"
 $env:AZURE_SPEECH_REGION = "eastus"   # Or your resource region
 
-# Basic synthesis (notes.txt -> notes.wav)
-python .\TTS.py -i notes.txt -o notes.wav -v en-US-AriaNeural
+# Basic synthesis
+uv run python .\TTS.py -i input-text.txt -o notes.wav -v en-US-AriaNeural
 ```
 
 If run with **no arguments**, the tool prints its help and exits.
@@ -106,17 +106,20 @@ $env:AZURE_SPEECH_REGION = "eastus"
 ## 3. Core Usage
 
 ```powershell
-# Basic (defaults to notes.txt -> notes.wav, voice Aria)
-python .\TTS.py
+# If run with no arguments, the tool prints its help and exits
+uv run python .\TTS.py
+
+# Basic (defaults to voice Aria)
+uv run python .\TTS.py -i input-text.txt -o narration.wav
 
 # Explicit input/output and voice
-python .\TTS.py -i notes.txt -o narration.wav -v en-US-GuyNeural
+uv run python .\TTS.py -i input-text.txt -o narration.wav -v en-US-GuyNeural
 
 # Choose a format (friendly alias)
-python .\TTS.py -i notes.txt -f riff-24khz-16bit-mono-pcm
+uv run python .\TTS.py -i input-text.txt -f riff-24khz-16bit-mono-pcm
 
 # Faster MP3 output (smaller file)
-python .\TTS.py -i notes.txt -f mp3-24k-96 -o notes.mp3
+uv run python .\TTS.py -i input-text.txt -f mp3-24k-96 -o notes.mp3
 ```
 
 If the chosen output format isn't RIFF/WAV, the tool writes raw bytes exactly as returned by the SDK (no merging logic needed if single chunk).
@@ -127,21 +130,21 @@ If the chosen output format isn't RIFF/WAV, the tool writes raw bytes exactly as
 ### 4.1 Voices
 ```powershell
 # All voices (may be large)
-python .\TTS.py --list-voices
+uv run python .\TTS.py --list-voices
 
 # Filter by locale
-python .\TTS.py --list-voices --locale-filter en-GB
+uv run python .\TTS.py --list-voices --locale-filter en-GB
 
 # Fuzzy name containment
-python .\TTS.py --list-voices --contains aria
+uv run python .\TTS.py --list-voices --contains aria
 
 # JSON output (automation)
-python .\TTS.py --list-voices --locale-filter en-US --json > voices.json
+uv run python .\TTS.py --list-voices --locale-filter en-US --json > voices.json
 ```
 
 ### 4.2 Formats
 ```powershell
-python .\TTS.py --list-formats
+uv run python .\TTS.py --list-formats
 ```
 Shows alias -> enum mapping (only those present in the SDK version you installed).
 
@@ -161,18 +164,18 @@ The tool automatically switches to SSML mode when any of: `--rate`, `--pitch`, `
 Examples:
 ```powershell
 # Faster, slightly higher pitch
-python .\TTS.py -i notes.txt -o fast.wav -v en-US-GuyNeural --rate +25% --pitch +2st
+uv run python .\TTS.py -i input-text.txt -o fast.wav -v en-US-GuyNeural --rate +25% --pitch +2st
 
 # Slower, deeper
-python .\TTS.py -i notes.txt -o slow.wav -v en-US-AriaNeural --rate -15% --pitch -2st
+uv run python .\TTS.py -i input-text.txt -o slow.wav -v en-US-AriaNeural --rate -15% --pitch -2st
 
 # Expressive style
-python .\TTS.py -i notes.txt -o cast.wav -v en-US-DavisNeural --style newscast --style-degree 1.0
+uv run python .\TTS.py -i input-text.txt -o cast.wav -v en-US-DavisNeural --style newscast --style-degree 1.0
 ```
 
 ### 5.1 Inspect Generated SSML
 ```powershell
-python .\TTS.py -i notes.txt --write-ssml --rate +10% --pitch +2st
+uv run python .\TTS.py -i input-text.txt --write-ssml --rate +10% --pitch +2st
 ```
 Produces `ssml_chunk_<n>.xml` per chunk (neutral SSML if no prosody/style flags are active).
 
@@ -184,7 +187,7 @@ Produces `ssml_chunk_<n>.xml` per chunk (neutral SSML if no prosody/style flags 
 
 Diagnostics:
 ```powershell
-python .\TTS.py -i notes.txt --debug-chunks
+uv run python .\TTS.py -i input-text.txt --debug-chunks
 ```
 Creates `chunk_<n>.txt` and prints a 160-char preview for each.
 
@@ -202,7 +205,7 @@ If a non-standard layout prevents patching, a warning is emitted and a naive con
 ## 8. Duration Verification
 After synthesis, you can verify the merged length:
 ```powershell
-python .\TTS.py -i notes.txt --verify-duration
+uv run python .\TTS.py -i input-text.txt --verify-duration
 ```
 Outputs `[VERIFY] channels=... sample_rate=... data_size=... duration=XX.XXs`.
 
@@ -261,13 +264,13 @@ Exit codes:
 ## 14. Reference Commands (Copy/Paste)
 ```powershell
 # List voices (US English JSON)
-python .\TTS.py --list-voices --locale-filter en-US --json
+uv run python .\TTS.py --list-voices --locale-filter en-US --json
 
 # Generate energetic narration with diagnostics
-python .\TTS.py -i notes.txt -o energetic.wav -v en-US-JennyNeural --style cheerful --style-degree 0.7 --rate +10% --debug-chunks --write-SSML --verify-duration
+uv run python .\TTS.py -i input-text.txt -o energetic.wav -v en-US-JennyNeural --style cheerful --style-degree 0.7 --rate +10% --debug-chunks --write-SSML --verify-duration
 
 # MP3 output faster download
-python .\TTS.py -i notes.txt -o notes.mp3 -f mp3-24k-96
+uv run python .\TTS.py -i input-text.txt -o notes.mp3 -f mp3-24k-96
 ```
 
 ---
