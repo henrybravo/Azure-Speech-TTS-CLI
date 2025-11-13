@@ -205,3 +205,18 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# Project-specific artifacts (Azure Speech TTS CLI)
+# Generated audio outputs
+*.wav
+
+# Virtual environment (already partially covered but keep explicit)
+.venv/
+
+# Generated SSML inspection files
+ssml_chunk_*.xml
+
+# Debug chunk text exports
+chunk_*.txt
+
+klad.txt
