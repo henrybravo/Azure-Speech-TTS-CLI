@@ -1,4 +1,4 @@
-# Azure Speech TTS CLI (Single-File Utility)
+# Azure Speech TTS CLI
 
 <p align="center">
 	<a href="https://www.python.org/">
@@ -22,7 +22,7 @@
 	<em>Chunked, inspectable, SSML-powered text‑to‑speech pipeline in one Python file.</em>
 </p>
 
-A single-file Python CLI (`TTS.py`) for converting large text files (e.g. slide notes) into speech using **Azure AI Services Speech** by AI Foundry.
+A single-file Python CLI (`TTS.py`) for converting large text files into speech using **Azure AI Services Speech** by AI Foundry.
 
 It adds:
 - Automatic safe chunking (sentence-aware) for long input files
@@ -34,7 +34,6 @@ It adds:
 - Robust WAV merging (multi-chunk RIFF concatenation with header repair)
 - Duration verification (`--verify-duration`) to validate merged output
 - Graceful handling of missing SDK dependency with helpful remediation
-- Help-on-empty invocation
 
 > Goal: Practical, inspectable, dependency-light tool for narration prep, rapid prototyping, or batch generation pipelines.
 
@@ -108,19 +107,17 @@ $env:AZURE_SPEECH_REGION = "eastus"
 ```powershell
 # If run with no arguments, the tool prints its help and exits
 uv run python .\TTS.py                                                           
-usage: TTS.py [-h] [--input INPUT] [--output OUTPUT] [--voice VOICE] [--format FORMAT] [--max-chars MAX_CHARS]
-              [--list-voices] [--locale-filter LOCALE_FILTER] [--contains CONTAINS] [--json] [--list-formats]
-              [--rate RATE] [--pitch PITCH] [--volume VOLUME] [--style STYLE] [--style-degree STYLE_DEGREE]
-              [--debug-chunks] [--write-ssml] [--verify-duration]
+usage: TTS.py [-h] --input INPUT [--output OUTPUT] [--voice VOICE] [--format FORMAT] [--max-chars MAX_CHARS] [--list-voices] [--locale-filter LOCALE_FILTER] [--contains CONTAINS] [--json]
+              [--list-formats] [--rate RATE] [--pitch PITCH] [--volume VOLUME] [--style STYLE] [--style-degree STYLE_DEGREE] [--debug-chunks] [--write-ssml] [--verify-duration]
 
 Azure Speech Text-to-Speech from a text file.
 
 options:
   -h, --help            show this help message and exit
-  --input, -i INPUT     Input text file (default: notes.txt)
+  --input, -i INPUT     Input text file (required).
   --output, -o OUTPUT   Output WAV filename (default: <input-stem>.wav)
   --voice, -v VOICE     Voice name (default: en-US-AriaNeural)
-  --format, -f FORMAT   Speech synthesis output format (friendly alias or enum). Use --list-formats to inspect.       
+  --format, -f FORMAT   Speech synthesis output format (friendly alias or enum). Use --list-formats to inspect.
   --max-chars MAX_CHARS
                         Maximum characters per chunk (default: 5000).
   --list-voices         List available voices for the configured region and exit.
@@ -137,7 +134,7 @@ options:
                         Style degree (0.0–2.0 typical).
   --debug-chunks        Print chunk summaries and write chunk_<n>.txt files before synthesis.
   --write-ssml          Write SSML per chunk to ssml_chunk_<n>.xml (neutral SSML if not using prosody/style).
-  --verify-duration     After merge, parse WAV header and report duration & per-segment declared sizes.uv run python .\TTS.py
+  --verify-duration     After merge, parse WAV header and report duration & per-segment declared sizes.
 
 # Basic (defaults to voice Aria)
 uv run python .\TTS.py -i input-text.txt -o narration.wav

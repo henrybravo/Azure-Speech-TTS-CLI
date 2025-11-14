@@ -326,7 +326,7 @@ def write_bytes(path: Path, data: bytes) -> None:
 
 def parse_args(argv: List[str]) -> argparse.Namespace:
   parser = argparse.ArgumentParser(description="Azure Speech Text-to-Speech from a text file.")
-  parser.add_argument("--input", "-i", default="notes.txt", help="Input text file (default: notes.txt)")
+  parser.add_argument("--input", "-i", required=True, help="Input text file (required).")
   parser.add_argument("--output", "-o", default=None, help="Output WAV filename (default: <input-stem>.wav)")
   parser.add_argument("--voice", "-v", default="en-US-AriaNeural", help="Voice name (default: en-US-AriaNeural)")
   parser.add_argument(
@@ -519,6 +519,9 @@ def main(argv: List[str]) -> int:
     return list_voices(speech_config, args.locale_filter, args.contains, args.json)
 
   in_path = Path(args.input)
+  if not in_path.exists():
+    print(f"[FATAL] Input file not found: {in_path}. Supply a valid path with --input.")
+    return 1
   out_path = Path(args.output) if args.output else Path(in_path.stem + ".wav")
 
   try:
