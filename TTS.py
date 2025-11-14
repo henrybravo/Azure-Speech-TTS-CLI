@@ -415,27 +415,92 @@ def list_voices(speech_config: speechsdk.SpeechConfig, locale_filter: str | None
   if locale_filter:
     voices = [v for v in voices if (v.locale or '').lower() == locale_filter.lower()]
   if contains:
-    voices = [v for v in voices if contains.lower() in (v.name or '').lower()]
+    needle = contains.lower().strip()
+    def _gender_name(gender_obj):
+      if gender_obj is None:
+        return ''
+      if hasattr(gender_obj, 'name') and isinstance(getattr(gender_obj, 'name'), str):
+        try:
+          return gender_obj.name.lower()  # type: ignore[attr-defined]
+        except Exception:  # noqa: BLE001
+          return str(gender_obj).lower()
+      return str(gender_obj).lower()
+    def _matches(v):
+      gender_val = _gender_name(getattr(v, 'gender', None))
+      # Exact gender handling to avoid 'male' matching 'female'.
+      if needle in ('male', 'female'):
+        return gender_val == needle
+      # Build token list from name, short_name, locale, styles, and gender.
+      raw_tokens = [
+        v.name or '',
+        getattr(v, 'short_name', '') or '',
+        v.locale or '',
+        gender_val,
+      ] + (getattr(v, 'style_list', []) or [])
+      tokens: list[str] = []
+      for t in raw_tokens:
+        if not t:
+          continue
+        # Split on non-alphanumeric to get atomic tokens
+        tokens.extend([x for x in re.split(r'[^a-zA-Z0-9]+', t) if x])
+      tokens_lower = [t.lower() for t in tokens]
+      # Prefer exact token match; fallback to substring in original fields if no exact match.
+      if needle in tokens_lower:
+        return True
+      # Substring fallback across original joined lower text (excluding gender to avoid male/female confusion)
+      haystack_parts = [p.lower() for p in raw_tokens if p]
+      # Remove gender part for substring search when searching generic term containing 'male'/'female'
+      if needle in ('male', 'female'):
+        haystack_parts = [p for p in haystack_parts if p != gender_val]
+      return any(needle in p for p in haystack_parts if p)
+    voices = [v for v in voices if _matches(v)]
   if not voices:
     print("[INFO] No voices matched filters.")
     return 0
   if as_json:
-    payload = [
-      {
+    def _normalize(val):
+      """Return a JSON-serializable representation of SDK values.
+
+      Converts Enums (with .name) to their name, leaves primitives untouched,
+      falls back to str(val) for unknown object types.
+      """
+      if val is None:
+        return None
+      # Enum-like: has .name and .value attributes typically
+      if hasattr(val, "name") and isinstance(getattr(val, "name"), str):
+        try:
+          return val.name  # type: ignore[attr-defined]
+        except Exception:  # noqa: BLE001
+          pass
+      # Primitives pass through
+      if isinstance(val, (str, int, float, bool, list, dict)):
+        return val
+      return str(val)
+
+    payload = []
+    for v in voices:
+      gender_raw = getattr(v, 'gender', None)
+      styles_raw = getattr(v, 'style_list', None)
+      payload.append({
         "name": v.name,
         "locale": v.locale,
-        "gender": getattr(v, 'gender', None),
+        "gender": _normalize(gender_raw),
         "shortName": getattr(v, 'short_name', None),
-        "styles": getattr(v, 'style_list', None),
-      }
-      for v in voices
-    ]
+        "styles": [_normalize(s) for s in styles_raw] if styles_raw else None,
+      })
     print(json.dumps(payload, indent=2))
   else:
     print("Available voices (name | locale | gender | styles):")
     for v in voices:
-      styles = ",".join(getattr(v, 'style_list', []) or [])
-      print(f"  {v.name} | {v.locale} | {getattr(v, 'gender', '?')} | {styles}")
+      gender_val = getattr(v, 'gender', '?')
+      if gender_val != '?' and hasattr(gender_val, 'name'):
+        try:
+          gender_val = gender_val.name  # type: ignore[attr-defined]
+        except Exception:  # noqa: BLE001
+          gender_val = str(gender_val)
+      styles_list = getattr(v, 'style_list', []) or []
+      styles = ",".join(styles_list)
+      print(f"  {v.name} | {v.locale} | {gender_val} | {styles}")
     print(f"[INFO] Total voices listed: {len(voices)}")
   return 0
 

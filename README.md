@@ -22,7 +22,7 @@
 	<em>Chunked, inspectable, SSML-powered text‑to‑speech pipeline in one Python file.</em>
 </p>
 
-A production-ready, single-file Python CLI (`TTS.py`) for converting large text files (e.g. slide notes) into speech using **Azure Cognitive Services Speech**.
+A single-file Python CLI (`TTS.py`) for converting large text files (e.g. slide notes) into speech using **Azure AI Services Speech** by AI Foundry.
 
 It adds:
 - Automatic safe chunking (sentence-aware) for long input files
@@ -107,7 +107,37 @@ $env:AZURE_SPEECH_REGION = "eastus"
 
 ```powershell
 # If run with no arguments, the tool prints its help and exits
-uv run python .\TTS.py
+uv run python .\TTS.py                                                           
+usage: TTS.py [-h] [--input INPUT] [--output OUTPUT] [--voice VOICE] [--format FORMAT] [--max-chars MAX_CHARS]
+              [--list-voices] [--locale-filter LOCALE_FILTER] [--contains CONTAINS] [--json] [--list-formats]
+              [--rate RATE] [--pitch PITCH] [--volume VOLUME] [--style STYLE] [--style-degree STYLE_DEGREE]
+              [--debug-chunks] [--write-ssml] [--verify-duration]
+
+Azure Speech Text-to-Speech from a text file.
+
+options:
+  -h, --help            show this help message and exit
+  --input, -i INPUT     Input text file (default: notes.txt)
+  --output, -o OUTPUT   Output WAV filename (default: <input-stem>.wav)
+  --voice, -v VOICE     Voice name (default: en-US-AriaNeural)
+  --format, -f FORMAT   Speech synthesis output format (friendly alias or enum). Use --list-formats to inspect.       
+  --max-chars MAX_CHARS
+                        Maximum characters per chunk (default: 5000).
+  --list-voices         List available voices for the configured region and exit.
+  --locale-filter LOCALE_FILTER
+                        Optional locale filter (e.g. en-GB, en-US).
+  --contains CONTAINS   Substring filter applied to voice name (case-insensitive).
+  --json                Output voice listing as JSON when used with --list-voices.
+  --list-formats        List supported friendly audio format aliases and exit.
+  --rate RATE           Prosody speaking rate (e.g. +20%, -10%, fast, x-slow).
+  --pitch PITCH         Prosody pitch (e.g. +2st, -3st, +5%).
+  --volume VOLUME       Prosody volume adjustment (e.g. +0%, +10%, -5%).
+  --style STYLE         Expressive style name (voice must support it, e.g. newscast, chat, cheerful).
+  --style-degree STYLE_DEGREE
+                        Style degree (0.0–2.0 typical).
+  --debug-chunks        Print chunk summaries and write chunk_<n>.txt files before synthesis.
+  --write-ssml          Write SSML per chunk to ssml_chunk_<n>.xml (neutral SSML if not using prosody/style).
+  --verify-duration     After merge, parse WAV header and report duration & per-segment declared sizes.uv run python .\TTS.py
 
 # Basic (defaults to voice Aria)
 uv run python .\TTS.py -i input-text.txt -o narration.wav
